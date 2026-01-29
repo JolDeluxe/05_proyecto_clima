@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ======================================================
+// ÁREAS
+// Contenedores macro del sistema
+// Ej: DIRECCION, OPERACIONES, CAPITAL HUMANO
+// ======================================================
+model Area {
+  id            Int            @id @default(autoincrement())
+  nombre        String
+  orden         Int            @default(1)
+
+  departamentos Departamento[]
+}
+
+// ======================================================
+// DEPARTAMENTOS
+// Agrupadores dentro de un Área
+// Ej: Producción, Corte, Calidad
+// ======================================================
+model Departamento {
+  id               Int            @id @default(autoincrement())
+  nombre           String
+  orden            Int            @default(1)
+
+  areaId           Int
+  area             Area           @relation(fields: [areaId], references: [id], onDelete: Cascade)
+
+  subdepartamentos SubDepartamento[]
+}
+
+// ======================================================
+// SUBDEPARTAMENTOS (ENTREGABLE REAL)
+// Aquí vive el activo visual (imagen)
+// Ej: Jefe Raúl, Coord. Víctor, Reporte Global
+// ======================================================
+model SubDepartamento {
+  id             Int            @id @default(autoincrement())
+  nombre         String
+  imageName      String
+  orden          Int            @default(1)
+
+  departamentoId Int
+  departamento   Departamento   @relation(fields: [departamentoId], references: [id], onDelete: Cascade)
+
+  permisos       UserPermission[]
+}
+
+// ======================================================
+// USUARIOS
+// Identidad + rol (el rol NO decide permisos finales)
+// ======================================================
+model User {
+  id       Int            @id @default(autoincrement())
+  username String         @unique
+  password String
+  nombre   String
+  role     String         @default("NIVEL 5")
+
+  permisos UserPermission[]
+}
+
+// ======================================================
+// PERMISOS
+// Fuente de verdad de qué puede ver cada usuario
+// ======================================================
+model UserPermission {
+  id                Int             @id @default(autoincrement())
+
+  userId            Int
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  subDepartamentoId Int
+  subDepartamento   SubDepartamento @relation(fields: [subDepartamentoId], references: [id], onDelete: Cascade)
+}
