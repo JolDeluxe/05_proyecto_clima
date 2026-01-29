@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 // Configuración de Viewport para bloquear el zoom en móviles
 export const viewport: Viewport = {
-  themeColor: "#004a99",
+  themeColor: "#ffffff",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,    // Impide que el usuario amplíe la imagen
