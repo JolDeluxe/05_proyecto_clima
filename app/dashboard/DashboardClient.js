@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useDashboard } from "./DashboardContext";
 
 export default function DashboardClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { setShowBackground } = useDashboard();
 
   const file = searchParams.get("view");
   const [resolvedFile, setResolvedFile] = useState(null);
@@ -16,11 +18,13 @@ export default function DashboardClient() {
   useEffect(() => {
     if (!file) {
       setResolvedFile(null);
+      setShowBackground(true);   // 🔥 SIN IMAGEN
       return;
     }
 
     const isMobile = window.innerWidth < 1024;
     setResolvedFile(isMobile ? `M_${file}` : file);
+    setShowBackground(false);  // 🔥 CON IMAGEN
   }, [file]);
 
   if (!resolvedFile) {
