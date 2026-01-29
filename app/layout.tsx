@@ -11,14 +11,19 @@ export const metadata: Metadata = {
     title: "Clima MBC",
   },
   icons: {
-    // Usamos el favicon que mencionas
+    // Referencia al icono en la raíz de la carpeta public
     icon: "/favicon.ico", 
     apple: "/favicon.ico", 
   },
 };
 
+// Configuración de Viewport para bloquear el zoom en móviles
 export const viewport: Viewport = {
-  themeColor: "#004a99", 
+  themeColor: "#004a99",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,    // Impide que el usuario amplíe la imagen
+  userScalable: false, // Desactiva el gesto de "pinza" para hacer zoom
 };
 
 export default function RootLayout({
@@ -29,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        {/* Referencia corregida al favicon para Apple */}
+        {/* Etiqueta necesaria para que iOS reconozca el icono de la PWA */}
         <link rel="apple-touch-icon" href="/favicon.ico" />
       </head>
       <body>{children}</body>
