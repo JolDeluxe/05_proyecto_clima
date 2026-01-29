@@ -28,7 +28,6 @@ export async function GET(request: Request) {
 
   // ==================================================
   // 3️⃣ Normalizar nombre para permisos
-  //     M_601.png → 601.png
   // ==================================================
   const normalizedFileName = fileName.startsWith("M_")
     ? fileName.replace("M_", "")
@@ -57,7 +56,6 @@ export async function GET(request: Request) {
   // ==================================================
   let finalPath = path.join(BASE_PATH, fileName);
 
-  // Si no existe versión móvil, caer a la normal
   if (!fs.existsSync(finalPath) && fileName.startsWith("M_")) {
     const fallbackFile = fileName.replace("M_", "");
     const fallbackPath = path.join(BASE_PATH, fallbackFile);
@@ -74,12 +72,15 @@ export async function GET(request: Request) {
   const buffer = fs.readFileSync(finalPath);
 
   // ==================================================
-  // 6️⃣ Responder imagen
+  // 6️⃣ Responder imagen - Único punto modificado
   // ==================================================
   return new NextResponse(buffer, {
     headers: {
       "Content-Type": "image/jpeg",
-      "Cache-Control": "private, max-age=86400",
+      // Eliminamos max-age=86400 para forzar la actualización
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
     },
   });
 }
