@@ -54,7 +54,7 @@ export default function HeaderMobile({ user }) {
         </button>
 
         <div className="flex items-center gap-3">
-          <img src="/img/GPTW.png" alt="GPTW" className="h-10 w-auto opacity-90" />
+          <img src="/img/GPTW.webp" alt="GPTW" className="h-10 w-auto opacity-90" />
           <img src="/img/01_Cuadra.webp" alt="Cuadra" className="h-7 w-auto" />
         </div>
 

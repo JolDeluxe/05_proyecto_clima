@@ -14,9 +14,9 @@ export default function LoginPage() {
   useEffect(() => {
     const updateBackground = () => {
       if (window.innerWidth >= 1024) {
-        setBgImage("/img/A2.png"); // desktop
+        setBgImage("/img/A2.webp"); // desktop
       } else {
-        setBgImage("/img/2.jpg"); // móvil
+        setBgImage("/img/2.webp"); // móvil
       }
     };
 
@@ -68,7 +68,7 @@ export default function LoginPage() {
           {/* LOGOS LADO A LADO */}
           <div className="flex items-center justify-center gap-6 mb-6">
             <img
-              src="/img/GPTW.png"
+              src="/img/GPTW.webp"
               alt="Great Place To Work"
               className="w-[60px] opacity-90"
             />

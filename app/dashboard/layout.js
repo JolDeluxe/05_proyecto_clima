@@ -16,8 +16,8 @@ function LayoutContent({ children }) {
     const updateBg = () => {
       setBgImage(
         window.innerWidth >= 1024
-          ? "/img/img_fondo.png"
-          : "/img/img_fondo_m.png"
+          ? "/img/img_fondo.webp"
+          : "/img/img_fondo_m.webp"
       );
     };
 

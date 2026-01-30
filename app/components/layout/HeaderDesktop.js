@@ -93,7 +93,7 @@ export default function HeaderDesktop({ user }) {
       {/* NIVEL 1 - LOGOS Y PERFIL */}
       <div className="relative flex justify-center items-center py-3 border-b border-gray-100">
         <div className="flex items-center gap-4 cursor-pointer" onClick={() => router.push('/dashboard')}>
-          <img src="/img/GPTW.png" alt="GPTW" className="h-10 w-auto opacity-90" />
+          <img src="/img/GPTW.webp" alt="GPTW" className="h-10 w-auto opacity-90" />
           <img src="/img/01_Cuadra.webp" alt="Cuadra" className="h-7 w-auto" />
         </div>
 
