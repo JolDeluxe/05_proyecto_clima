@@ -20,16 +20,21 @@ export default function HeaderDesktop({ user }) {
       .then((res) => res.json())
       .then((data) => {
         if (!Array.isArray(data) || data.length === 0) return;
-
         setMenu(data);
 
+        // Auto-selección inicial si solo hay una ruta posible
         if (
           data.length === 1 &&
           data[0].departamentos.length === 1 &&
           data[0].departamentos[0].subdepartamentos.length === 1
         ) {
-          setAreaActiva(data[0]);
-          setDeptoActivo(data[0].departamentos[0]);
+          const unicoArea = data[0];
+          const unicoDepto = data[0].departamentos[0];
+          const unicoSub = unicoDepto.subdepartamentos[0];
+          
+          setAreaActiva(unicoArea);
+          setDeptoActivo(unicoDepto);
+          setSubDeptoActivo(unicoSub);
         }
       })
       .catch(console.error);
@@ -48,18 +53,50 @@ export default function HeaderDesktop({ user }) {
     router.push(`/dashboard?view=${subDepto.imageName}`);
   };
 
+  // Función estratégica para manejar clics en Áreas
+  const manejarClickArea = (area) => {
+    setAreaActiva(area);
+    setDeptoActivo(null);
+    setSubDeptoActivo(null);
+
+    // NUEVA LÓGICA: Si el área solo tiene 1 departamento...
+    if (area.departamentos.length === 1) {
+      const deptoUnico = area.departamentos[0];
+      
+      // Si además ese único depto solo tiene 1 subdepto -> Ir directo al reporte
+      if (deptoUnico.subdepartamentos.length === 1) {
+        setDeptoActivo(deptoUnico);
+        seleccionarReporte(deptoUnico.subdepartamentos[0]);
+      } else {
+        // Si tiene varios subdeptos -> Saltamos el nivel 3 y mostramos el nivel 4 directamente
+        setDeptoActivo(deptoUnico);
+      }
+    }
+  };
+
+  // Función estratégica para manejar clics en Departamentos
+  const manejarClickDepto = (depto) => {
+    // Si el depto solo tiene 1 subdepartamento -> Ir directo
+    if (depto.subdepartamentos.length === 1) {
+      setDeptoActivo(depto);
+      seleccionarReporte(depto.subdepartamentos[0]);
+    } else {
+      // Si tiene varios, abrir el nivel 4 normalmente
+      setDeptoActivo(depto);
+      setSubDeptoActivo(null);
+    }
+  };
+
   return (
     <div className="flex flex-col w-full bg-white shadow-sm z-50">
 
-      {/* NIVEL 1 */}
+      {/* NIVEL 1 - LOGOS Y PERFIL */}
       <div className="relative flex justify-center items-center py-3 border-b border-gray-100">
-        {/* Agregado cursor-pointer a las imágenes si quisieras que regresen al home */}
         <div className="flex items-center gap-4 cursor-pointer" onClick={() => router.push('/dashboard')}>
           <img src="/img/GPTW.png" alt="GPTW" className="h-10 w-auto opacity-90" />
           <img src="/img/01_Cuadra.webp" alt="Cuadra" className="h-7 w-auto" />
         </div>
 
-        {/* USER + LOGOUT */}
         <div className="absolute right-8 top-1/2 -translate-y-1/2 flex items-center gap-3">
           <span className="text-[10px] font-bold text-gray-500 uppercase hidden xl:block">
             {user?.nombre}
@@ -85,9 +122,7 @@ export default function HeaderDesktop({ user }) {
                 onClick={handleLogout}
                 disabled={loggingOut}
                 className={`text-[9px] font-bold uppercase px-3 py-1 rounded text-white cursor-pointer ${
-                  loggingOut
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-red-600 hover:bg-red-700"
+                  loggingOut ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
                 }`}
               >
                 {loggingOut ? "Saliendo..." : "Confirmar"}
@@ -102,11 +137,7 @@ export default function HeaderDesktop({ user }) {
         {menu.map((area) => (
           <button
             key={area.id}
-            onClick={() => {
-              setAreaActiva(area);
-              setDeptoActivo(null);
-              setSubDeptoActivo(null);
-            }}
+            onClick={() => manejarClickArea(area)}
             className={`text-xs font-bold tracking-[0.15em] uppercase border-b-2 px-1 pb-1 cursor-pointer transition-colors ${
               areaActiva?.id === area.id
                 ? "text-amber-950 border-amber-900"
@@ -118,17 +149,14 @@ export default function HeaderDesktop({ user }) {
         ))}
       </div>
 
-      {/* NIVEL 3 - Departamentos */}
-      {areaActiva && (
+      {/* NIVEL 3 - Departamentos (Se oculta si el área solo tiene un departamento) */}
+      {areaActiva && areaActiva.departamentos.length > 1 && (
         <div className="w-full bg-gray-50 border-t border-gray-100">
           <div className="flex justify-center gap-6 py-2">
             {areaActiva.departamentos.map((depto) => (
               <button
                 key={depto.id}
-                onClick={() => {
-                  setDeptoActivo(depto);
-                  setSubDeptoActivo(null);
-                }}
+                onClick={() => manejarClickDepto(depto)}
                 className={`text-[11px] font-bold uppercase cursor-pointer transition-colors ${
                   deptoActivo?.id === depto.id
                     ? "text-amber-700"
@@ -142,8 +170,8 @@ export default function HeaderDesktop({ user }) {
         </div>
       )}
 
-      {/* NIVEL 4 - Reportes */}
-      {deptoActivo && (
+      {/* NIVEL 4 - Reportes (Solo se muestra si hay opciones múltiples) */}
+      {deptoActivo && deptoActivo.subdepartamentos.length > 1 && (
         <div className="flex justify-center gap-4 py-2 bg-white border-b border-gray-100">
           {deptoActivo.subdepartamentos.map((sub) => (
             <button

@@ -10,7 +10,6 @@ export default function HeaderMobile({ user }) {
   const [areaExpandida, setAreaExpandida] = useState(null);
   const [deptoExpandido, setDeptoExpandido] = useState(null);
 
-  // 🔥 NUEVO: estado de logout
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
@@ -24,10 +23,7 @@ export default function HeaderMobile({ user }) {
 
   const handleLogout = () => {
     if (loggingOut) return;
-
     setLoggingOut(true);
-
-    // pequeño delay solo para UX
     setTimeout(() => {
       localStorage.removeItem("usuario_mbc");
       router.push("/login");
@@ -41,7 +37,6 @@ export default function HeaderMobile({ user }) {
 
   return (
     <nav className="lg:hidden bg-white w-full shadow-sm sticky top-0 z-50">
-
       {/* BARRA SUPERIOR */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <button
@@ -58,7 +53,6 @@ export default function HeaderMobile({ user }) {
           </svg>
         </button>
 
-        {/* LOGOS */}
         <div className="flex items-center gap-3">
           <img src="/img/GPTW.png" alt="GPTW" className="h-10 w-auto opacity-90" />
           <img src="/img/01_Cuadra.webp" alt="Cuadra" className="h-7 w-auto" />
@@ -78,7 +72,6 @@ export default function HeaderMobile({ user }) {
           />
 
           <div className="absolute top-full left-0 w-full bg-white z-50 shadow-xl max-h-[85vh] flex flex-col">
-
             <div className="px-5 py-4 border-b border-gray-100">
               <p className="text-xs font-bold uppercase">{user?.nombre}</p>
             </div>
@@ -98,50 +91,69 @@ export default function HeaderMobile({ user }) {
 
                   {areaExpandida === area.id && (
                     <div className="px-4 pb-3">
-                      {area.departamentos.map((depto) => (
-                        <div key={depto.id}>
-                          <button
-                            onClick={() =>
-                              setDeptoExpandido(
-                                deptoExpandido === depto.id ? null : depto.id
-                              )
-                            }
-                            className="w-full px-4 py-2 flex justify-between text-[11px] font-bold uppercase"
-                          >
-                            {depto.nombre}
-                            <span>{deptoExpandido === depto.id ? "−" : "+"}</span>
-                          </button>
-
-                          {deptoExpandido === depto.id && (
-                            <div className="flex flex-wrap gap-2 px-4 pt-2">
-                              {depto.subdepartamentos.map((sub) => (
-                                <button
-                                  key={sub.id}
-                                  onClick={() => seleccionarReporte(sub.imageName)}
-                                  className="px-3 py-1 text-[10px] font-bold uppercase rounded-full border"
-                                >
-                                  {sub.nombre}
-                                </button>
-                              ))}
-                            </div>
-                          )}
+                      {/* LÓGICA DE ATAJO: Si el área solo tiene un departamento, mostramos sus reportes directo */}
+                      {area.departamentos.length === 1 ? (
+                        <div className="flex flex-wrap gap-2 px-4 pt-2">
+                          {area.departamentos[0].subdepartamentos.map((sub) => (
+                            <button
+                              key={sub.id}
+                              onClick={() => seleccionarReporte(sub.imageName)}
+                              className="px-3 py-1 text-[10px] font-bold uppercase rounded-full border border-amber-900/20 text-amber-900 bg-amber-50"
+                            >
+                              {sub.nombre}
+                            </button>
+                          ))}
                         </div>
-                      ))}
+                      ) : (
+                        /* Si tiene varios departamentos, mostramos la lista normal */
+                        area.departamentos.map((depto) => (
+                          <div key={depto.id}>
+                            <button
+                              onClick={() => {
+                                // ATAJO: Si el depto tiene un solo reporte, abrirlo directo
+                                if (depto.subdepartamentos.length === 1) {
+                                  seleccionarReporte(depto.subdepartamentos[0].imageName);
+                                } else {
+                                  setDeptoExpandido(deptoExpandido === depto.id ? null : depto.id);
+                                }
+                              }}
+                              className="w-full px-4 py-2 flex justify-between text-[11px] font-bold uppercase text-gray-700"
+                            >
+                              {depto.nombre}
+                              {depto.subdepartamentos.length > 1 && (
+                                <span>{deptoExpandido === depto.id ? "−" : "+"}</span>
+                              )}
+                            </button>
+
+                            {deptoExpandido === depto.id && depto.subdepartamentos.length > 1 && (
+                              <div className="flex flex-wrap gap-2 px-4 pt-2 pb-2">
+                                {depto.subdepartamentos.map((sub) => (
+                                  <button
+                                    key={sub.id}
+                                    onClick={() => seleccionarReporte(sub.imageName)}
+                                    className="px-3 py-1 text-[10px] font-bold uppercase rounded-full border border-gray-200 text-gray-600 active:bg-amber-900 active:text-white"
+                                  >
+                                    {sub.nombre}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      )}
                     </div>
                   )}
                 </div>
               ))}
             </div>
 
-            {/* LOGOUT — MISMO DISEÑO, MEJOR UX */}
+            {/* LOGOUT */}
             <div className="p-4 border-t border-gray-100">
               <button
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className={`w-full py-3 rounded-lg text-xs font-bold uppercase text-white ${
-                  loggingOut
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-red-600 hover:bg-red-700"
+                className={`w-full py-3 rounded-lg text-xs font-bold uppercase text-white transition-colors ${
+                  loggingOut ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
                 }`}
               >
                 {loggingOut ? "Cerrando sesión..." : "Cerrar sesión"}

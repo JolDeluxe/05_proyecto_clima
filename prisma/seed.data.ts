@@ -63,10 +63,20 @@ export const DEPARTAMENTOS = [
         image: "101.png",
         orden: 1,
       },
+    ],
+  },
+
+  // -------- DIRECCIÓN / EDGAR CARRILLO --------
+
+  {
+    area: "DIR",
+    nombre: "EDGAR CARRILLO ANTILLON",
+    orden: 2,
+    subDeptos: [
       {
         nombre: "CARRILLO ANTILLON EDGAR",
         image: "102.png",
-        orden: 2,
+        orden: 1,
       },
     ],
   },
@@ -207,10 +217,20 @@ export const DEPARTAMENTOS = [
         image: "301.png",
         orden: 1,
       },
+    ],
+  },
+
+  // -------- OPERACIONES / PAZ LUNA --------
+
+  {
+    area: "OPS",
+    nombre: "MA. DE LA PAZ LUNA SOTELO",
+    orden: 1,
+    subDeptos: [
       {
         nombre: "LUNA SOTELO MA. DE LA PAZ",
         image: "302.png",
-        orden: 2,
+        orden: 1,
       },
     ],
   },
