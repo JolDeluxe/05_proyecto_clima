@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
-import { prisma } from "@/app/lib/prisma"; 
+import { prisma } from "@/app/lib/prisma";
 
 const loginSchema = z.object({
   username: z.string().min(1),
@@ -25,37 +25,59 @@ export async function POST(request: Request) {
 
     const usuario = await prisma.user.findUnique({ where: { username } });
     if (!usuario) {
-      return NextResponse.json({ status: "error", message: "Credenciales inválidas" }, { status: 401 });
+      return NextResponse.json(
+        { status: "error", message: "Credenciales inválidas" },
+        { status: 401 }
+      );
     }
 
     const ok = await bcrypt.compare(password, usuario.password);
     if (!ok) {
-      return NextResponse.json({ status: "error", message: "Credenciales inválidas" }, { status: 401 });
+      return NextResponse.json(
+        { status: "error", message: "Credenciales inválidas" },
+        { status: 401 }
+      );
     }
 
-    // 1. Token configurado para 15 días
+    // ✅ Token válido por 365 días
     const token = jwt.sign(
-      { id: usuario.id, username: usuario.username, role: usuario.role, nombre: usuario.nombre },
-      process.env.JWT_SECRET || "secreto_default",
-      { expiresIn: "15d" }
+      {
+        id: usuario.id,
+        username: usuario.username,
+        role: usuario.role,
+        nombre: usuario.nombre,
+      },
+      process.env.JWT_SECRET!,
+      { expiresIn: "365d" }
     );
 
     const res = NextResponse.json({
       status: "success",
-      user: { id: usuario.id, nombre: usuario.nombre, role: usuario.role, username: usuario.username },
+      user: {
+        id: usuario.id,
+        nombre: usuario.nombre,
+        role: usuario.role,
+        username: usuario.username,
+      },
     });
 
-    // 2. Cookie configurada para 15 días (en segundos)
-    // 60 segundos * 60 minutos * 24 horas * 15 días
+    // ✅ Cookie también válida por 365 días
     res.cookies.set("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
+      sameSite: "none",
+      domain: ".mbc-bitacoras.me",
       path: "/",
-      maxAge: 60 * 60 * 24 * 15, 
+
+      // 60s * 60m * 24h * 365d = 1 año
+      maxAge: 60 * 60 * 24 * 365,
     });
 
     return res;
-  } catch {
-    return NextResponse.json({ status: "error", message: "Error interno" }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json(
+      { status: "error", message: "Error interno" },
+      { status: 500 }
+    );
   }
 }
