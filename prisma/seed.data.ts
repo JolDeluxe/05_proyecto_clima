@@ -608,7 +608,7 @@ export const USUARIOS = [
   // ==================================================
   {
     username: "EDGAR",
-    password: "Edgar123",
+    password: "Antillon",
     nombre: "Edgar Carrillo Antillón",
     role: "NIVEL 1",
     permisos: [],
