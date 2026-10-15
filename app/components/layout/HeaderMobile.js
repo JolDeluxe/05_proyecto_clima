@@ -15,7 +15,7 @@ export default function HeaderMobile({ user }) {
   useEffect(() => {
     if (!user?.username) return;
 
-    fetch(`/api/menu?username=${user.username}`)
+    fetch(`/api/menu?username=${user.username}`, { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => Array.isArray(data) && setMenu(data))
       .catch(console.error);

@@ -16,7 +16,7 @@ export default function HeaderDesktop({ user }) {
   useEffect(() => {
     if (!user?.username) return;
 
-    fetch(`/api/menu?username=${user.username}`)
+    fetch(`/api/menu?username=${user.username}`, { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         if (!Array.isArray(data) || data.length === 0) return;

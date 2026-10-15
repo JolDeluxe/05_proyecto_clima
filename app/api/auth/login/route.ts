@@ -64,12 +64,9 @@ export async function POST(request: Request) {
     // ✅ Cookie también válida por 365 días
     res.cookies.set("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      domain: ".mbc-bitacoras.me",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       path: "/",
-
-      // 60s * 60m * 24h * 365d = 1 año
       maxAge: 60 * 60 * 24 * 365,
     });
 
