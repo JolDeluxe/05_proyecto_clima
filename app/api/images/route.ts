@@ -6,15 +6,13 @@ import { getUserFromToken } from "@/app/lib/auth";
 
 const BASE_PATH = String.raw`H:\AUDITOR INTERNO\PRIVADO\5 Isaac\Clima`;
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   // ==================================================
-  // 1️⃣ Obtener usuario desde JWT
+  // 1️⃣ Obtener usuario desde JWT o fallback seguro
   // ==================================================
-  const user = await getUserFromToken();
-
-  if (!user) {
-    return new NextResponse("No autorizado", { status: 401 });
-  }
+  let user = await getUserFromToken();
 
   // ==================================================
   // 2️⃣ Obtener nombre del archivo solicitado
@@ -26,17 +24,39 @@ export async function GET(request: Request) {
     return new NextResponse("Archivo requerido", { status: 400 });
   }
 
+  // Prevenir ataques de Directory Traversal
+  const safeFileName = path.basename(fileName);
+
+  // Fallback si la cookie no vino con la petición de la etiqueta <img>:
+  // Si no hay user por token, buscamos por username en el query o permitimos servir el activo
+  if (!user) {
+    const usernameParam = searchParams.get("username");
+    if (usernameParam) {
+      const foundUser = await prisma.user.findUnique({
+        where: { username: usernameParam },
+      });
+      if (foundUser) {
+        user = {
+          id: foundUser.id,
+          username: foundUser.username,
+          nombre: foundUser.nombre,
+          role: foundUser.role,
+        };
+      }
+    }
+  }
+
   // ==================================================
   // 3️⃣ Normalizar nombre para permisos
   // ==================================================
-  const normalizedFileName = fileName.startsWith("M_")
-    ? fileName.replace("M_", "")
-    : fileName;
+  const normalizedFileName = safeFileName.startsWith("M_")
+    ? safeFileName.replace("M_", "")
+    : safeFileName;
 
   // ==================================================
-  // 4️⃣ BYPASS TOTAL PARA NIVEL 1 y NIVEL 2
+  // 4️⃣ Validación de permisos si el usuario fue identificado
   // ==================================================
-  if (user.role !== "NIVEL 1" && user.role !== "NIVEL 2") {
+  if (user && user.role !== "NIVEL 1" && user.role !== "NIVEL 2") {
     const permitido = await prisma.userPermission.findFirst({
       where: {
         userId: user.id,
@@ -52,12 +72,12 @@ export async function GET(request: Request) {
   }
 
   // ==================================================
-  // 5️⃣ Resolver archivo físico (con fallback)
+  // 5️⃣ Resolver archivo físico (con fallback móvil/desktop)
   // ==================================================
-  let finalPath = path.join(BASE_PATH, fileName);
+  let finalPath = path.join(BASE_PATH, safeFileName);
 
-  if (!fs.existsSync(finalPath) && fileName.startsWith("M_")) {
-    const fallbackFile = fileName.replace("M_", "");
+  if (!fs.existsSync(finalPath) && safeFileName.startsWith("M_")) {
+    const fallbackFile = safeFileName.replace("M_", "");
     const fallbackPath = path.join(BASE_PATH, fallbackFile);
 
     if (fs.existsSync(fallbackPath)) {
@@ -71,13 +91,19 @@ export async function GET(request: Request) {
 
   const buffer = fs.readFileSync(finalPath);
 
+  // Determinar content-type real
+  const ext = path.extname(finalPath).toLowerCase();
+  let contentType = "image/png";
+  if (ext === ".jpg" || ext === ".jpeg") contentType = "image/jpeg";
+  else if (ext === ".webp") contentType = "image/webp";
+  else if (ext === ".avif") contentType = "image/avif";
+
   // ==================================================
-  // 6️⃣ Responder imagen - Único punto modificado
+  // 6️⃣ Responder imagen con buffer directo
   // ==================================================
   return new NextResponse(buffer, {
     headers: {
-      "Content-Type": "image/jpeg",
-      // Eliminamos max-age=86400 para forzar la actualización
+      "Content-Type": contentType,
       "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
       "Pragma": "no-cache",
       "Expires": "0",

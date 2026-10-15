@@ -14,10 +14,6 @@ export default function DashboardClient() {
   const [timestamp, setTimestamp] = useState(Date.now());
 
   useEffect(() => {
-    router.replace("/dashboard");
-  }, []);
-
-  useEffect(() => {
     if (!file) {
       setResolvedFile(null);
       setShowBackground(true);
