@@ -3,8 +3,10 @@ import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import * as bcrypt from "bcryptjs";
 import { AREAS, DEPARTAMENTOS, USUARIOS } from "./seed.data";
 
+const databaseUrl = process.env.DATABASE_URL || "file:./dev.db";
+
 const prisma = new PrismaClient({
-  adapter: new PrismaBetterSqlite3({ url: "file:./dev.db" }),
+  adapter: new PrismaBetterSqlite3({ url: databaseUrl }),
 });
 
 export async function runSeed() {

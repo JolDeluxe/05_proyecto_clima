@@ -5,9 +5,11 @@ import { runSeed } from "./seed.engine";
 // ======================================================
 // CONFIGURACIÓN DE PRISMA
 // ======================================================
+const databaseUrl = process.env.DATABASE_URL || "file:./dev.db";
+
 const prisma = new PrismaClient({
   adapter: new PrismaBetterSqlite3({
-    url: "file:./dev.db",
+    url: databaseUrl,
   }),
 });
 

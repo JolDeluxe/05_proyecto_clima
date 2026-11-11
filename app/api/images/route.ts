@@ -4,7 +4,9 @@ import path from "path";
 import { prisma } from "@/app/lib/prisma";
 import { getUserFromToken } from "@/app/lib/auth";
 
-const BASE_PATH = String.raw`H:\AUDITOR INTERNO\PRIVADO\5 Isaac\Clima`;
+const BASE_PATH =
+  process.env.IMAGES_BASE_PATH ||
+  String.raw`H:\AUDITOR INTERNO\PRIVADO\5 Isaac\Clima`;
 
 export const dynamic = "force-dynamic";
 
