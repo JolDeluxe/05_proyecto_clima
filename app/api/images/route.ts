@@ -6,7 +6,7 @@ import { getUserFromToken } from "@/app/lib/auth";
 
 const BASE_PATH =
   process.env.IMAGES_BASE_PATH ||
-  String.raw`H:\AUDITOR INTERNO\PRIVADO\5 Isaac\Clima`;
+  String.raw`C:\App\Proyectos\05_proyecto_clima\img`;
 
 export const dynamic = "force-dynamic";
 
