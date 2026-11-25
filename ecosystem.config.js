@@ -14,6 +14,9 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 3001,
+        DATABASE_URL: "file:./dev.db",
+        JWT_SECRET: "super_secreto_clave_mbc_2026_cuadra",
+        IMAGES_BASE_PATH: "C:\\Servidor\\Datos\\Clima",
       },
       error_file: "logs/pm2-error.log",
       out_file: "logs/pm2-out.log",
